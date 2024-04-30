@@ -10,6 +10,65 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-output "string" {
-  value = random_string.string.result
+output "resource_group_name" {
+  description = "The name of the Resource Group"
+  value       = var.create_resource_group ? module.resource_group[0].name : var.resource_group_name
+}
+
+output "resource_group_id" {
+  description = "The ID of the Resource Group"
+  value       = try(module.resource_group.id, "")
+}
+
+output "container_registry_id" {
+  description = "The ID of the Container Registry"
+  value       = module.acr.container_registry_id
+}
+
+output "container_registry_login_server" {
+  description = "The login server of the Container Registry"
+  value       = module.acr.container_registry_login_server
+}
+
+output "container_registry_name" {
+  description = "Name of the Container Registry"
+  value       = module.acr.container_registry_name
+}
+
+output "container_registry_admin_username" {
+  description = "The admin username of the Container Registry"
+  value       = module.acr.container_registry_admin_username
+  sensitive   = true
+}
+
+output "container_registry_admin_password" {
+  description = "The admin password of the Container Registry"
+  value       = module.acr.container_registry_admin_password
+  sensitive   = true
+}
+
+output "container_registry_admin_enabled" {
+  description = "The admin enable of the Container Registry"
+  value       = module.acr.container_registry_admin_enabled
+  sensitive   = true
+}
+
+output "private_dns_zone_id" {
+  description = "The ID of the Private DNS Zone"
+  value       = module.private_dns_zone.id
+}
+
+output "private_dns_zone_name" {
+  description = "The name of the Private DNS Zone"
+  value       = module.private_dns_zone.zone_name
+}
+
+output "vnet_link_id" {
+  description = "The ID of the VNet Link"
+  value       = module.vnet_link.id
+}
+
+output "private_endpoint_id" {
+  description = "The ID of the Private Endpoint"
+  value       = module.private_endpoint.id
 }
