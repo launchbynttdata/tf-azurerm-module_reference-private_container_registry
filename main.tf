@@ -51,6 +51,7 @@ module "acr" {
   zone_redundancy_enabled       = var.zone_redundancy_enabled
   georeplications               = var.georeplications
   network_rule_set              = var.network_rule_set
+  retention_policy              = var.retention_policy
 
   tags = merge(var.tags, { resource_name = module.resource_names["acr"].standard })
 
@@ -82,7 +83,7 @@ module "vnet_link" {
 }
 
 module "private_endpoint" {
-  source = "git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-private_endpoint.git"
+  source = "git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-private_endpoint.git?ref=1.0.0"
 
   endpoint_name                   = module.resource_names["private_endpoint"].standard
   is_manual_connection            = false
