@@ -156,6 +156,9 @@ No resources.
 | <a name="input_georeplications"></a> [georeplications](#input\_georeplications) | If specified, the ACR will be replicated to other regions specified in this block | <pre>map(object({<br>    location                  = string<br>    regional_endpoint_enabled = bool<br>    zone_redundancy_enabled   = bool<br>  }))</pre> | `{}` | no |
 | <a name="input_network_rule_set"></a> [network\_rule\_set](#input\_network\_rule\_set) | Network rules to explicitly allow IP ranges<br>    CIDR ranges should be provided | `list(string)` | `[]` | no |
 | <a name="input_acr_subnet_id"></a> [acr\_subnet\_id](#input\_acr\_subnet\_id) | The ID of the subnet in which the private endpoint should be created. | `string` | n/a | yes |
+| <a name="input_private_dns_zone_name"></a> [private\_dns\_zone\_name](#input\_private\_dns\_zone\_name) | The name of the private DNS zone to which the private endpoint should be associated. Defaults to privatelink.azurecr.io, but needs to change for gov cloud. | `string` | `"privatelink.azurecr.io"` | no |
+| <a name="input_private_service_connection_name"></a> [private\_service\_connection\_name](#input\_private\_service\_connection\_name) | The name of the private service connection. Defaults to pvt-connection-acr | `string` | `"pvt-connection-acr"` | no |
+| <a name="input_private_dns_zone_group_name"></a> [private\_dns\_zone\_group\_name](#input\_private\_dns\_zone\_group\_name) | The name of the private DNS zone group. Defaults to pvt-dns-group | `string` | `"pvt-dns-group"` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Custom tags for the  container registry | `map(string)` | `{}` | no |
 
 ## Outputs
