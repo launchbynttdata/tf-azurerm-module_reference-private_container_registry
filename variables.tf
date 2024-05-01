@@ -176,6 +176,24 @@ variable "acr_subnet_id" {
   type        = string
 }
 
+variable "private_dns_zone_name" {
+  description = "The name of the private DNS zone to which the private endpoint should be associated. Defaults to privatelink.azurecr.io, but needs to change for gov cloud."
+  type        = string
+  default     = "privatelink.azurecr.io"
+}
+
+variable "private_service_connection_name" {
+  description = "The name of the private service connection. Defaults to pvt-connection-acr"
+  type        = string
+  default     = "pvt-connection-acr"
+}
+
+variable "private_dns_zone_group_name" {
+  description = "The name of the private DNS zone group. Defaults to pvt-dns-group"
+  type        = string
+  default     = "pvt-dns-group"
+}
+
 variable "tags" {
   description = "Custom tags for the  container registry"
   type        = map(string)

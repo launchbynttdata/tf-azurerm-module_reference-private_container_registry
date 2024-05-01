@@ -61,7 +61,7 @@ module "acr" {
 module "private_dns_zone" {
   source = "git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-private_dns_zone.git?ref=1.0.0"
 
-  zone_name           = "privatelink.azurecr.io"
+  zone_name           = var.private_dns_zone_name
   resource_group_name = var.create_resource_group ? module.resource_group[0].name : var.resource_group_name
 
   tags = var.tags
@@ -85,15 +85,16 @@ module "vnet_link" {
 module "private_endpoint" {
   source = "git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-private_endpoint.git?ref=1.0.0"
 
+  region                          = var.region
   endpoint_name                   = module.resource_names["private_endpoint"].standard
   is_manual_connection            = false
   resource_group_name             = var.create_resource_group ? module.resource_group[0].name : var.resource_group_name
-  private_service_connection_name = "pvt-connection-acr"
+  private_service_connection_name = var.private_service_connection_name
   private_connection_resource_id  = module.acr.container_registry_id
   subresource_names               = ["registry"]
   subnet_id                       = var.acr_subnet_id
   private_dns_zone_ids            = [module.private_dns_zone.id]
-  private_dns_zone_group_name     = "pvt-dns-group"
+  private_dns_zone_group_name     = var.private_dns_zone_group_name
 
   tags = var.tags
 
