@@ -11,7 +11,8 @@
 // limitations under the License.
 
 module "resource_names" {
-  source = "git::https://github.com/launchbynttdata/tf-launch-module_library-resource_name.git?ref=1.0.1"
+  source  = "terraform.registry.launch.nttdata.com/module_library/resource_name/launch"
+  version = "~> 1.0"
 
   for_each = var.resource_names_map
 
@@ -26,7 +27,8 @@ module "resource_names" {
 }
 
 module "resource_group" {
-  source = "git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-resource_group.git?ref=1.0.0"
+  source  = "terraform.registry.launch.nttdata.com/module_primitive/resource_group/azurerm"
+  version = "~> 1.0"
 
   count = var.create_resource_group ? 1 : 0
 
@@ -37,7 +39,8 @@ module "resource_group" {
 }
 
 module "acr" {
-  source = "git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-container_registry.git?ref=1.0.0"
+  source  = "terraform.registry.launch.nttdata.com/module_primitive/container_registry/azurerm"
+  version = "~> 1.0"
 
   container_registry_name       = var.container_registry_name != null ? var.container_registry_name : module.resource_names["acr"].lower_case_without_any_separators
   location                      = var.region
@@ -59,7 +62,8 @@ module "acr" {
 }
 
 module "private_dns_zone" {
-  source = "git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-private_dns_zone.git?ref=1.0.0"
+  source  = "terraform.registry.launch.nttdata.com/module_primitive/private_dns_zone/azurerm"
+  version = "~> 1.0"
 
   zone_name           = var.private_dns_zone_name
   resource_group_name = var.create_resource_group ? module.resource_group[0].name : var.resource_group_name
@@ -70,7 +74,8 @@ module "private_dns_zone" {
 }
 
 module "vnet_link" {
-  source = "git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-private_dns_vnet_link.git?ref=1.0.0"
+  source  = "terraform.registry.launch.nttdata.com/module_primitive/private_dns_vnet_link/azurerm"
+  version = "~> 1.0"
 
   link_name             = "acr-pe-vnet-link"
   private_dns_zone_name = module.private_dns_zone.zone_name
@@ -83,7 +88,8 @@ module "vnet_link" {
 }
 
 module "private_endpoint" {
-  source = "git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-private_endpoint.git?ref=1.0.0"
+  source  = "terraform.registry.launch.nttdata.com/module_primitive/private_endpoint/azurerm"
+  version = "~> 1.0"
 
   region                          = var.region
   endpoint_name                   = module.resource_names["private_endpoint"].standard

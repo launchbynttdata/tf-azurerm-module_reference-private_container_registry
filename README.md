@@ -121,12 +121,12 @@ No providers.
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_resource_names"></a> [resource\_names](#module\_resource\_names) | git::https://github.com/launchbynttdata/tf-launch-module_library-resource_name.git | 1.0.1 |
-| <a name="module_resource_group"></a> [resource\_group](#module\_resource\_group) | git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-resource_group.git | 1.0.0 |
-| <a name="module_acr"></a> [acr](#module\_acr) | git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-container_registry.git | 1.0.0 |
-| <a name="module_private_dns_zone"></a> [private\_dns\_zone](#module\_private\_dns\_zone) | git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-private_dns_zone.git | 1.0.0 |
-| <a name="module_vnet_link"></a> [vnet\_link](#module\_vnet\_link) | git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-private_dns_vnet_link.git | 1.0.0 |
-| <a name="module_private_endpoint"></a> [private\_endpoint](#module\_private\_endpoint) | git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-private_endpoint.git | 1.0.0 |
+| <a name="module_resource_names"></a> [resource\_names](#module\_resource\_names) | terraform.registry.launch.nttdata.com/module_library/resource_name/launch | ~> 1.0 |
+| <a name="module_resource_group"></a> [resource\_group](#module\_resource\_group) | terraform.registry.launch.nttdata.com/module_primitive/resource_group/azurerm | ~> 1.0 |
+| <a name="module_acr"></a> [acr](#module\_acr) | terraform.registry.launch.nttdata.com/module_primitive/container_registry/azurerm | ~> 1.0 |
+| <a name="module_private_dns_zone"></a> [private\_dns\_zone](#module\_private\_dns\_zone) | terraform.registry.launch.nttdata.com/module_primitive/private_dns_zone/azurerm | ~> 1.0 |
+| <a name="module_vnet_link"></a> [vnet\_link](#module\_vnet\_link) | terraform.registry.launch.nttdata.com/module_primitive/private_dns_vnet_link/azurerm | ~> 1.0 |
+| <a name="module_private_endpoint"></a> [private\_endpoint](#module\_private\_endpoint) | terraform.registry.launch.nttdata.com/module_primitive/private_endpoint/azurerm | ~> 1.0 |
 
 ## Resources
 
