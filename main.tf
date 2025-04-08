@@ -30,7 +30,7 @@ module "resource_group" {
   source  = "terraform.registry.launch.nttdata.com/module_primitive/resource_group/azurerm"
   version = "~> 1.0"
 
-  count = var.create_resource_group ? 1 : 0
+  count = var.create_resource_group == true ? 1 : 0
 
   name     = module.resource_names["rg"].standard
   location = var.region
@@ -40,11 +40,11 @@ module "resource_group" {
 
 module "acr" {
   source  = "terraform.registry.launch.nttdata.com/module_primitive/container_registry/azurerm"
-  version = "~> 1.0"
+  version = "~> 2.0"
 
-  container_registry_name       = var.container_registry_name != null ? var.container_registry_name : module.resource_names["acr"].lower_case_without_any_separators
+  container_registry_name       = var.container_registry_name != null ? var.container_registry_name : module.resource_names["acr"].minimal_random_without_any_separators
   location                      = var.region
-  resource_group_name           = var.create_resource_group ? module.resource_group[0].name : var.resource_group_name
+  resource_group_name           = var.resource_group_name == null ? module.resource_group[0].name : var.resource_group_name
   sku                           = "Premium"
   admin_enabled                 = var.admin_enabled
   public_network_access_enabled = var.public_network_access_enabled
@@ -66,7 +66,7 @@ module "private_dns_zone" {
   version = "~> 1.0"
 
   zone_name           = var.private_dns_zone_name
-  resource_group_name = var.create_resource_group ? module.resource_group[0].name : var.resource_group_name
+  resource_group_name = coalesce(var.private_dns_zone_resource_group_name, var.resource_group_name, can(module.resource_group[0].name) ? module.resource_group[0].name : null)
 
   tags = var.tags
 
@@ -74,13 +74,14 @@ module "private_dns_zone" {
 }
 
 module "vnet_link" {
+  count   = var.create_dns_vnet_link ? 1 : 0
   source  = "terraform.registry.launch.nttdata.com/module_primitive/private_dns_vnet_link/azurerm"
   version = "~> 1.0"
 
   link_name             = "acr-pe-vnet-link"
   private_dns_zone_name = module.private_dns_zone.zone_name
   virtual_network_id    = local.vnet_id
-  resource_group_name   = var.create_resource_group ? module.resource_group[0].name : var.resource_group_name
+  resource_group_name   = coalesce(var.resource_group_name, can(module.resource_group[0].name) ? module.resource_group[0].name : null)
 
   tags = var.tags
 
@@ -94,8 +95,8 @@ module "private_endpoint" {
   region                          = var.region
   endpoint_name                   = module.resource_names["private_endpoint"].standard
   is_manual_connection            = false
-  resource_group_name             = var.create_resource_group ? module.resource_group[0].name : var.resource_group_name
-  private_service_connection_name = var.private_service_connection_name
+  resource_group_name             = coalesce(var.resource_group_name, can(module.resource_group[0].name) ? module.resource_group[0].name : null)
+  private_service_connection_name = coalesce(var.private_service_connection_name, module.resource_names["private_endpoint_service_connection"].standard)
   private_connection_resource_id  = module.acr.container_registry_id
   subresource_names               = ["registry"]
   subnet_id                       = var.acr_subnet_id
@@ -105,4 +106,14 @@ module "private_endpoint" {
   tags = var.tags
 
   depends_on = [module.resource_group, module.acr, module.private_dns_zone]
+}
+
+module "access_control" {
+  source               = "terraform.registry.launch.nttdata.com/module_primitive/role_assignment/azurerm"
+  version              = "~> 1.0"
+  for_each             = var.role_assignments
+  role_definition_name = each.value.role_definition_name
+  principal_id         = each.value.principal_id
+  scope                = module.acr.container_registry_id
+  depends_on           = [module.acr]
 }

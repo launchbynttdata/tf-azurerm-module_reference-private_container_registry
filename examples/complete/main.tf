@@ -10,3 +10,79 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+module "container_registry" {
+  source                          = "../.."
+  acr_subnet_id                   = var.acr_subnet_id != null ? var.acr_subnet_id : lookup(module.network.vnet_subnets_name_id, "acr")
+  resource_group_name             = coalesce(var.resource_group_name, module.resource_names["rg"].minimal_random_suffix)
+  create_resource_group           = var.resource_group_name == null ? true : false
+  container_registry_name         = coalesce(var.container_registry_name, module.resource_names["acr"].minimal_random_suffix_without_any_separators)
+  private_service_connection_name = coalesce(var.private_service_connection_name, module.resource_names["private_endpoint_service_connection"].standard)
+  network_rule_set                = var.network_rule_set
+  public_network_access_enabled   = var.public_network_access_enabled
+  role_assignments                = local.acr_role_assignments
+  admin_enabled                   = var.admin_enabled
+  retention_policy                = var.retention_policy
+  identity_ids                    = var.identity_ids
+  encryption                      = var.encryption
+  georeplications                 = var.georeplications
+  network_rule_bypass_option      = var.network_rule_bypass_option
+  zone_redundancy_enabled         = var.zone_redundancy_enabled
+  private_dns_zone_name           = var.private_dns_zone_name
+  private_dns_zone_group_name     = var.private_dns_zone_group_name
+  create_dns_vnet_link            = var.create_dns_vnet_link
+
+  tags = var.tags
+}
+
+data "azurerm_client_config" "current" {
+}
+
+module "network" {
+  source  = "terraform.registry.launch.nttdata.com/module_primitive/virtual_network/azurerm"
+  version = "~> 2.0"
+
+  use_for_each                                     = var.use_for_each
+  vnet_location                                    = local.location
+  address_space                                    = var.address_space
+  bgp_community                                    = var.bgp_community
+  ddos_protection_plan                             = var.ddos_protection_plan
+  dns_servers                                      = var.dns_servers
+  nsg_ids                                          = var.nsg_ids
+  route_tables_ids                                 = var.route_tables_ids
+  subnet_delegation                                = var.subnet_delegation
+  subnet_private_endpoint_network_policies_enabled = var.subnet_private_endpoint_network_policies_enabled
+  subnet_names                                     = var.subnet_names
+  subnet_prefixes                                  = var.subnet_prefixes
+  subnet_service_endpoints                         = var.subnet_service_endpoints
+  resource_group_name                              = coalesce(var.resource_group_name, module.resource_names["rg"].minimal_random_suffix)
+  vnet_name                                        = module.resource_names["vnet"].minimal_random_suffix
+  tags                                             = local.tags
+
+  depends_on = [module.resource_group]
+}
+
+module "resource_names" {
+  source  = "terraform.registry.launch.nttdata.com/module_library/resource_name/launch"
+  version = "~> 1.0"
+
+  for_each = var.resource_names_map
+
+  region                  = join("", split("-", local.location))
+  class_env               = var.environment
+  cloud_resource_type     = each.value.name
+  instance_env            = var.environment_number
+  instance_resource       = var.resource_number
+  maximum_length          = each.value.max_length
+  logical_product_family  = var.logical_product_family
+  logical_product_service = var.logical_product_service
+  use_azure_region_abbr   = var.use_azure_region_abbr
+}
+
+module "resource_group" {
+  source  = "terraform.registry.launch.nttdata.com/module_primitive/resource_group/azurerm"
+  version = "~> 1.0"
+
+  name     = coalesce(var.resource_group_name, module.resource_names["rg"].minimal_random_suffix)
+  location = local.location
+  tags     = local.tags
+}

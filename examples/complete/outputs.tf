@@ -10,3 +10,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+output "container_registry_name" {
+  description = "The URL of the Azure Container Registry"
+  value       = module.container_registry.container_registry_name
+}

@@ -25,7 +25,7 @@ variable "product_service" {
     For example, backend, frontend, middleware etc.
   EOF
   type        = string
-  default     = "kube"
+  default     = "acr"
 }
 
 variable "environment" {
@@ -67,6 +67,10 @@ variable "resource_names_map" {
       name       = "pe"
       max_length = 60
     }
+    private_endpoint_service_connection = {
+      name       = "pesc"
+      max_length = 80
+    }
   }
 }
 
@@ -77,7 +81,7 @@ variable "use_azure_region_abbr" {
 }
 
 variable "resource_group_name" {
-  description = "Name of the resource group in which the AKS cluster will be created. If not provided, this module will create one"
+  description = "Name of the resource group in which the ACR will be created. If not provided, this module will create one"
   type        = string
   default     = null
 }
@@ -185,13 +189,39 @@ variable "private_dns_zone_name" {
 variable "private_service_connection_name" {
   description = "The name of the private service connection. Defaults to pvt-connection-acr"
   type        = string
-  default     = "pvt-connection-acr"
+  default     = null
 }
 
 variable "private_dns_zone_group_name" {
   description = "The name of the private DNS zone group. Defaults to pvt-dns-group"
   type        = string
   default     = "pvt-dns-group"
+}
+
+variable "private_dns_zone_resource_group_name" {
+  description = "The name of the resource group in which the private DNS zone is created. Defaults to null."
+  type        = string
+  default     = null
+}
+
+variable "create_dns_vnet_link" {
+  description = "Whether to create a VNet link for the private DNS zone. Defaults to true."
+  type        = bool
+  default     = true
+}
+
+variable "role_assignments" {
+  description = <<EOT
+    A map of role assignments to be created for the container registry.
+    The key is the name of the role assignment and the value is an object with the following attributes:
+    - role_definition_name: The name of the role definition
+    - principal_id: The ID of the principal to assign the role to
+  EOT
+  type = map(object({
+    role_definition_name = string
+    principal_id         = string
+  }))
+  default = {}
 }
 
 variable "tags" {

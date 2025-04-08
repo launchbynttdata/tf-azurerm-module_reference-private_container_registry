@@ -12,7 +12,7 @@
 
 output "resource_group_name" {
   description = "The name of the Resource Group"
-  value       = var.create_resource_group ? module.resource_group[0].name : var.resource_group_name
+  value       = coalesce(var.resource_group_name, can(module.resource_group[0].name) ? module.resource_group[0].name : null)
 }
 
 output "resource_group_id" {
@@ -65,7 +65,7 @@ output "private_dns_zone_name" {
 
 output "vnet_link_id" {
   description = "The ID of the VNet Link"
-  value       = module.vnet_link.id
+  value       = var.create_dns_vnet_link ? module.vnet_link[0].id : null
 }
 
 output "private_endpoint_id" {
