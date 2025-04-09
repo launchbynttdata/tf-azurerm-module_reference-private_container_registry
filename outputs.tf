@@ -55,12 +55,12 @@ output "container_registry_admin_enabled" {
 
 output "private_dns_zone_id" {
   description = "The ID of the Private DNS Zone"
-  value       = module.private_dns_zone.id
+  value       = local.fetch_zone_id ? [data.azurerm_private_dns_zone.existing_private_zone[0].id] : [module.private_dns_zone[0].id]
 }
 
 output "private_dns_zone_name" {
   description = "The name of the Private DNS Zone"
-  value       = module.private_dns_zone.zone_name
+  value       = var.private_dns_zone_name
 }
 
 output "vnet_link_id" {

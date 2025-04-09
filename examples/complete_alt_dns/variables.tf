@@ -10,28 +10,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-variable "product_family" {
-  description = <<EOF
-    (Required) Name of the product family for which the resource is created.
-    Example: org_name, department_name.
-  EOF
-  type        = string
-  default     = "dso"
-}
-
-variable "product_service" {
-  description = <<EOF
-    (Required) Name of the product service for which the resource is created.
-    For example, backend, frontend, middleware etc.
-  EOF
-  type        = string
-  default     = "acr"
-}
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 variable "environment" {
   description = "Environment in which the resource should be provisioned like dev, qa, prod etc."
   type        = string
   default     = "dev"
+}
+
+variable "resource_number" {
+  description = "The resource count for the respective environment. Defaults to 000. Increments in value of 1"
+  type        = string
+  default     = "000"
+}
+
+variable "logical_product_family" {
+  description = "Logical product family for which the resource is created. Example: org_name, department_name."
+  type        = string
+  default     = "dso"
+}
+
+variable "logical_product_service" {
+  description = "Logical product service for which the resource is created. For example, backend, frontend, middleware etc."
+  type        = string
+  default     = "acr"
 }
 
 variable "environment_number" {
@@ -63,12 +75,32 @@ variable "resource_names_map" {
       name       = "rg"
       max_length = 60
     }
+    dnsrg = {
+      name       = "dnsrg"
+      max_length = 60
+    }
     private_endpoint = {
       name       = "pe"
       max_length = 60
     }
     private_endpoint_service_connection = {
       name       = "pesc"
+      max_length = 80
+    }
+    vnet = {
+      name       = "vnet"
+      max_length = 60
+    }
+    dnsvnet = {
+      name       = "dnsvnet"
+      max_length = 80
+    }
+    resource_group_vnet = {
+      name       = "vnetrg"
+      max_length = 80
+    }
+    private_dns_zone_link = {
+      name       = "pdzl"
       max_length = 80
     }
   }
@@ -86,11 +118,11 @@ variable "resource_group_name" {
   default     = null
 }
 
-variable "create_resource_group" {
-  description = "Whether to create a new resource group or use an existing one"
-  type        = bool
-  default     = true
-}
+# variable "create_resource_group" {
+#   description = "Whether to create a new resource group or use an existing one"
+#   type        = bool
+#   default     = true
+# }
 
 variable "container_registry_name" {
   type        = string
@@ -178,12 +210,7 @@ variable "network_rule_set" {
 variable "acr_subnet_id" {
   description = "The ID of the subnet in which the private endpoint should be created."
   type        = string
-}
-
-variable "create_private_dns_zone" {
-  description = "Whether to create a private DNS zone for the private endpoint. Defaults to true."
-  type        = bool
-  default     = true
+  default     = null
 }
 
 variable "private_dns_zone_name" {
@@ -195,7 +222,7 @@ variable "private_dns_zone_name" {
 variable "private_service_connection_name" {
   description = "The name of the private service connection. Defaults to pvt-connection-acr"
   type        = string
-  default     = null
+  default     = "pvt-connection-acr"
 }
 
 variable "private_dns_zone_group_name" {
@@ -210,19 +237,9 @@ variable "private_dns_zone_resource_group_name" {
   default     = null
 }
 
-variable "create_dns_vnet_link" {
-  description = "Whether to create a VNet link for the private DNS zone. Defaults to true."
-  type        = bool
-  default     = true
-}
 
-variable "role_assignments" {
-  description = <<EOT
-    A map of role assignments to be created for the container registry.
-    The key is the name of the role assignment and the value is an object with the following attributes:
-    - role_definition_name: The name of the role definition
-    - principal_id: The ID of the principal to assign the role to
-  EOT
+variable "acr_role_assignments" {
+  description = "A map of role assignments to be created for the container registry"
   type = map(object({
     role_definition_name = string
     principal_id         = string
@@ -230,8 +247,113 @@ variable "role_assignments" {
   default = {}
 }
 
+###########################################
+# Variables related to private DNS zone
+###########################################
+
+variable "zone_name" {
+  type        = string
+  description = "Name of the private dns zone. For public cloud, the default value is `privatelink.azurecr.io` and for sovereign clouds, the default value is `privatelink.azurecr.us`"
+  default     = "privatelink.azurecr.io"
+  validation {
+    condition     = contains(["privatelink.azurecr.io", "privatelink.azurecr.cr"], var.zone_name)
+    error_message = "The zone_name must be either 'privatelink.azurecr.io' or 'privatelink.azurecr.us'."
+  }
+}
+
+variable "create_private_dns_zone" {
+  description = "Whether to create a private DNS zone. Defaults to true."
+  type        = bool
+  default     = true
+}
+
+variable "create_dns_vnet_link" {
+  description = "Whether to create a VNet link for the private DNS zone. Defaults to true."
+  type        = bool
+  default     = true
+}
+########################################
+# Variables related to virtual network
+########################################
+
+variable "use_for_each" {
+  type        = bool
+  description = "Use `for_each` instead of `count` to create multiple resource instances."
+  default     = false
+}
+
+variable "address_space" {
+  type        = list(string)
+  description = "The address space that is used by the virtual network."
+}
+
+variable "bgp_community" {
+  type        = string
+  default     = null
+  description = "(Optional) The BGP community attribute in format `<as-number>:<community-value>`."
+}
+
+variable "ddos_protection_plan" {
+  type = object({
+    enable = bool
+    id     = string
+  })
+  default     = null
+  description = "The set of DDoS protection plan configuration"
+}
+
+# If no values specified, this defaults to Azure DNS
+variable "dns_servers" {
+  type        = list(string)
+  default     = []
+  description = "The DNS servers to be used with vNet."
+}
+
+variable "nsg_ids" {
+  type        = map(string)
+  default     = {}
+  description = "A map of subnet name to Network Security Group IDs"
+}
+
+variable "route_tables_ids" {
+  type        = map(string)
+  default     = {}
+  description = "A map of subnet name to Route table ids"
+}
+
+variable "subnet_delegation" {
+  type        = map(map(any))
+  default     = {}
+  description = "A map of subnet name to delegation block on the subnet"
+}
+
+variable "subnet_private_endpoint_network_policies_enabled" {
+  type        = map(string)
+  default     = {}
+  description = "A map of subnet name to enable/disable private link service network policies on the subnet."
+}
+
+variable "subnet_names" {
+  type        = list(string)
+  description = "A list of public subnets inside the vNet."
+}
+
+variable "subnet_prefixes" {
+  type        = list(string)
+  description = "The address prefix to use for the subnet."
+}
+
+variable "subnet_service_endpoints" {
+  type        = map(any)
+  default     = {}
+  description = "A map of subnet name to service endpoints to add to the subnet."
+}
+
+################################################
+# Tags to be associated with all child modules
+################################################
 variable "tags" {
-  description = "Custom tags for the  container registry"
+  description = "A map of tags to be associated with the resources"
   type        = map(string)
   default     = {}
 }

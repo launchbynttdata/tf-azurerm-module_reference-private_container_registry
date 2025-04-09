@@ -13,10 +13,10 @@
 module "container_registry" {
   source                          = "../.."
   acr_subnet_id                   = var.acr_subnet_id != null ? var.acr_subnet_id : lookup(module.network.vnet_subnets_name_id, "acr")
-  resource_group_name             = coalesce(var.resource_group_name, module.resource_names["rg"].minimal_random_suffix)
-  create_resource_group           = var.resource_group_name == null ? true : false
-  container_registry_name         = coalesce(var.container_registry_name, module.resource_names["acr"].minimal_random_suffix_without_any_separators)
-  private_service_connection_name = coalesce(var.private_service_connection_name, module.resource_names["private_endpoint_service_connection"].standard)
+  resource_group_name             = coalesce(var.resource_group_name, local.generated_rg_name)
+  create_resource_group           = true
+  container_registry_name         = coalesce(var.container_registry_name, local.generated_acr_name)
+  private_service_connection_name = coalesce(var.private_service_connection_name, local.generated_pesc_name)
   network_rule_set                = var.network_rule_set
   public_network_access_enabled   = var.public_network_access_enabled
   role_assignments                = local.acr_role_assignments
@@ -31,7 +31,7 @@ module "container_registry" {
   private_dns_zone_group_name     = var.private_dns_zone_group_name
   create_dns_vnet_link            = var.create_dns_vnet_link
 
-  tags = var.tags
+  tags = local.tags
 }
 
 data "azurerm_client_config" "current" {
@@ -54,8 +54,8 @@ module "network" {
   subnet_names                                     = var.subnet_names
   subnet_prefixes                                  = var.subnet_prefixes
   subnet_service_endpoints                         = var.subnet_service_endpoints
-  resource_group_name                              = coalesce(var.resource_group_name, module.resource_names["rg"].minimal_random_suffix)
-  vnet_name                                        = module.resource_names["vnet"].minimal_random_suffix
+  resource_group_name                              = coalesce(var.resource_group_name, local.generated_rg_name)
+  vnet_name                                        = local.generated_vnet_name
   tags                                             = local.tags
 
   depends_on = [module.resource_group]
@@ -82,7 +82,7 @@ module "resource_group" {
   source  = "terraform.registry.launch.nttdata.com/module_primitive/resource_group/azurerm"
   version = "~> 1.0"
 
-  name     = coalesce(var.resource_group_name, module.resource_names["rg"].minimal_random_suffix)
+  name     = coalesce(var.resource_group_name, local.generated_rg_name)
   location = local.location
   tags     = local.tags
 }

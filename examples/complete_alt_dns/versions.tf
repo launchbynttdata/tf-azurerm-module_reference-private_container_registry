@@ -10,8 +10,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-locals {
-  subnet_id_parts = split("/", var.acr_subnet_id)
-  vnet_id         = join("/", slice(local.subnet_id_parts, 0, 9))
-  fetch_zone_id   = var.create_dns_vnet_link == false && var.create_private_dns_zone == false ? true : false
+terraform {
+  required_version = "~> 1.5"
+
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~>3.67"
+    }
+  }
 }

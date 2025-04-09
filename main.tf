@@ -32,10 +32,10 @@ module "resource_group" {
 
   count = var.create_resource_group == true ? 1 : 0
 
-  name     = module.resource_names["rg"].standard
+  name     = coalesce(var.resource_group_name, module.resource_names["rg"].standard)
   location = var.region
 
-  tags = merge(var.tags, { resource_name = module.resource_names["rg"].standard })
+  tags = merge(var.tags, { resource_name = coalesce(var.resource_group_name, module.resource_names["rg"].standard) })
 }
 
 module "acr" {
@@ -62,9 +62,9 @@ module "acr" {
 }
 
 module "private_dns_zone" {
-  source  = "terraform.registry.launch.nttdata.com/module_primitive/private_dns_zone/azurerm"
-  version = "~> 1.0"
-
+  count               = var.create_private_dns_zone ? 1 : 0
+  source              = "terraform.registry.launch.nttdata.com/module_primitive/private_dns_zone/azurerm"
+  version             = "~> 1.0"
   zone_name           = var.private_dns_zone_name
   resource_group_name = coalesce(var.private_dns_zone_resource_group_name, var.resource_group_name, can(module.resource_group[0].name) ? module.resource_group[0].name : null)
 
@@ -79,7 +79,7 @@ module "vnet_link" {
   version = "~> 1.0"
 
   link_name             = "acr-pe-vnet-link"
-  private_dns_zone_name = module.private_dns_zone.zone_name
+  private_dns_zone_name = module.private_dns_zone[0].zone_name
   virtual_network_id    = local.vnet_id
   resource_group_name   = coalesce(var.resource_group_name, can(module.resource_group[0].name) ? module.resource_group[0].name : null)
 
@@ -100,7 +100,7 @@ module "private_endpoint" {
   private_connection_resource_id  = module.acr.container_registry_id
   subresource_names               = ["registry"]
   subnet_id                       = var.acr_subnet_id
-  private_dns_zone_ids            = [module.private_dns_zone.id]
+  private_dns_zone_ids            = local.fetch_zone_id ? [data.azurerm_private_dns_zone.existing_private_zone[0].id] : [module.private_dns_zone[0].id]
   private_dns_zone_group_name     = var.private_dns_zone_group_name
 
   tags = var.tags
