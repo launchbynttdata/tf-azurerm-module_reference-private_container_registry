@@ -15,6 +15,11 @@ output "resource_group_name" {
   value       = coalesce(var.resource_group_name, can(module.resource_group[0].name) ? module.resource_group[0].name : null)
 }
 
+output "ext_dns_resource_group_name" {
+  description = "The name of the external DNS Resource Group"
+  value       = var.private_dns_zone_resource_group_name
+}
+
 output "resource_group_id" {
   description = "The ID of the Resource Group"
   value       = try(module.resource_group.id, "")

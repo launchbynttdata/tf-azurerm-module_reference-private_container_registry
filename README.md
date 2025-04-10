@@ -175,6 +175,7 @@ If `make check` target is successful, developer is good to commit the code to pr
 | Name | Description |
 |------|-------------|
 | <a name="output_resource_group_name"></a> [resource\_group\_name](#output\_resource\_group\_name) | The name of the Resource Group |
+| <a name="output_ext_dns_resource_group_name"></a> [ext\_dns\_resource\_group\_name](#output\_ext\_dns\_resource\_group\_name) | The name of the external DNS Resource Group |
 | <a name="output_resource_group_id"></a> [resource\_group\_id](#output\_resource\_group\_id) | The ID of the Resource Group |
 | <a name="output_container_registry_id"></a> [container\_registry\_id](#output\_container\_registry\_id) | The ID of the Container Registry |
 | <a name="output_container_registry_login_server"></a> [container\_registry\_login\_server](#output\_container\_registry\_login\_server) | The login server of the Container Registry |

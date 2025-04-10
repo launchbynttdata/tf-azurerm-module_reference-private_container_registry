@@ -21,7 +21,7 @@ module "dns_resource_group" {
   source  = "terraform.registry.launch.nttdata.com/module_primitive/resource_group/azurerm"
   version = "~> 1.0"
 
-  name     = module.resource_names["dnsrg"].minimal_random_suffix
+  name     = local.generated_dnsrg_name
   location = local.location
   tags     = local.tags
 }
@@ -43,8 +43,8 @@ module "dns_network" {
   subnet_names                                     = ["private-dns"]
   subnet_prefixes                                  = ["172.16.0.0/24"]
   subnet_service_endpoints                         = {}
-  resource_group_name                              = module.resource_names["dnsrg"].minimal_random_suffix
-  vnet_name                                        = module.resource_names["dnsvnet"].minimal_random_suffix
+  resource_group_name                              = local.generated_dnsrg_name
+  vnet_name                                        = local.generated_dnsvnet_name
   tags                                             = local.tags
   depends_on                                       = [module.dns_resource_group]
 }
@@ -54,7 +54,7 @@ module "private_dns_zone" {
   version = "~> 1.0"
 
   zone_name           = var.private_dns_zone_name
-  resource_group_name = module.resource_names["dnsrg"].minimal_random_suffix
+  resource_group_name = local.generated_dnsrg_name
   tags                = local.tags
 }
 
@@ -64,7 +64,7 @@ module "private_dns_vnet_link" {
 
   link_name             = "tt_private_dns_vnet_link"
   private_dns_zone_name = var.private_dns_zone_name
-  resource_group_name   = module.resource_names["dnsrg"].minimal_random_suffix
+  resource_group_name   = local.generated_dnsrg_name
   virtual_network_id    = module.dns_network.vnet_id
   tags                  = local.tags
   depends_on            = [module.private_dns_zone]
@@ -81,10 +81,10 @@ module "private_dns_vnet_link" {
 module "container_registry" {
   source                               = "../.."
   acr_subnet_id                        = var.acr_subnet_id != null ? var.acr_subnet_id : lookup(module.network.vnet_subnets_name_id, "acr")
-  resource_group_name                  = coalesce(var.resource_group_name, module.resource_names["rg"].minimal_random_suffix)
+  resource_group_name                  = coalesce(var.resource_group_name, local.generated_rg_name)
   create_resource_group                = false
-  container_registry_name              = coalesce(var.container_registry_name, module.resource_names["acr"].minimal_random_suffix_without_any_separators)
-  private_service_connection_name      = coalesce(var.private_service_connection_name, module.resource_names["private_endpoint_service_connection"].standard)
+  container_registry_name              = coalesce(var.container_registry_name, local.generated_acr_name)
+  private_service_connection_name      = coalesce(var.private_service_connection_name, local.generated_pesc_name)
   network_rule_set                     = var.network_rule_set
   public_network_access_enabled        = var.public_network_access_enabled
   role_assignments                     = local.acr_role_assignments
@@ -99,7 +99,7 @@ module "container_registry" {
   private_dns_zone_group_name          = var.private_dns_zone_group_name
   create_dns_vnet_link                 = var.create_dns_vnet_link
   create_private_dns_zone              = var.create_private_dns_zone
-  private_dns_zone_resource_group_name = coalesce(var.private_dns_zone_resource_group_name, module.resource_names["dnsrg"].minimal_random_suffix)
+  private_dns_zone_resource_group_name = coalesce(var.private_dns_zone_resource_group_name, local.generated_dnsrg_name)
 
   tags       = var.tags
   depends_on = [module.dns_network, module.private_dns_zone, module.private_dns_vnet_link]
@@ -125,8 +125,8 @@ module "network" {
   subnet_names                                     = var.subnet_names
   subnet_prefixes                                  = var.subnet_prefixes
   subnet_service_endpoints                         = var.subnet_service_endpoints
-  resource_group_name                              = coalesce(var.resource_group_name, module.resource_names["rg"].minimal_random_suffix)
-  vnet_name                                        = module.resource_names["vnet"].minimal_random_suffix
+  resource_group_name                              = coalesce(var.resource_group_name, local.generated_rg_name)
+  vnet_name                                        = local.generated_vnet_name
   tags                                             = local.tags
 
   depends_on = [module.resource_group]
@@ -153,7 +153,7 @@ module "resource_group" {
   source  = "terraform.registry.launch.nttdata.com/module_primitive/resource_group/azurerm"
   version = "~> 1.0"
 
-  name     = coalesce(var.resource_group_name, module.resource_names["rg"].minimal_random_suffix)
+  name     = coalesce(var.resource_group_name, local.generated_rg_name)
   location = local.location
   tags     = local.tags
 }

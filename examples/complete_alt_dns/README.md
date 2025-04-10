@@ -86,4 +86,6 @@ This example shows how to use this reference module to configure the private DNS
 | Name | Description |
 |------|-------------|
 | <a name="output_container_registry_name"></a> [container\_registry\_name](#output\_container\_registry\_name) | The URL of the Azure Container Registry |
+| <a name="output_resource_group_name"></a> [resource\_group\_name](#output\_resource\_group\_name) | The name of the Resource Group |
+| <a name="output_ext_dns_resource_group_name"></a> [ext\_dns\_resource\_group\_name](#output\_ext\_dns\_resource\_group\_name) | The name of the external DNS Resource Group |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
