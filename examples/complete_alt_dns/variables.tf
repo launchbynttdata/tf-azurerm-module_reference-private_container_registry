@@ -10,18 +10,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 variable "environment" {
   description = "Environment in which the resource should be provisioned like dev, qa, prod etc."
   type        = string
@@ -75,6 +63,10 @@ variable "resource_names_map" {
       name       = "rg"
       max_length = 60
     }
+    dnsrg = {
+      name       = "dnsrg"
+      max_length = 60
+    }
     private_endpoint = {
       name       = "pe"
       max_length = 60
@@ -86,6 +78,10 @@ variable "resource_names_map" {
     vnet = {
       name       = "vnet"
       max_length = 60
+    }
+    dnsvnet = {
+      name       = "dnsvnet"
+      max_length = 80
     }
     resource_group_vnet = {
       name       = "vnetrg"
@@ -223,17 +219,12 @@ variable "private_dns_zone_group_name" {
   default     = "pvt-dns-group"
 }
 
-# variable "private_dns_zone_resource_group_name" {
-#   description = "The name of the resource group in which the private DNS zone is created. Defaults to null."
-#   type        = string
-#   default     = null
-# }
-
-variable "create_dns_vnet_link" {
-  description = "Whether to create a VNet link for the private DNS zone. Defaults to true."
-  type        = bool
-  default     = true
+variable "private_dns_zone_resource_group_name" {
+  description = "The name of the resource group in which the private DNS zone is created. Defaults to null."
+  type        = string
+  default     = null
 }
+
 
 variable "acr_role_assignments" {
   description = "A map of role assignments to be created for the container registry"
@@ -258,7 +249,17 @@ variable "zone_name" {
   }
 }
 
+variable "create_private_dns_zone" {
+  description = "Whether to create a private DNS zone. Defaults to true."
+  type        = bool
+  default     = true
+}
 
+variable "create_dns_vnet_link" {
+  description = "Whether to create a VNet link for the private DNS zone. Defaults to true."
+  type        = bool
+  default     = true
+}
 ########################################
 # Variables related to virtual network
 ########################################

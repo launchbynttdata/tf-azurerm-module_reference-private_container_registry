@@ -10,3 +10,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+output "container_registry_name" {
+  description = "The URL of the Azure Container Registry"
+  value       = module.container_registry.container_registry_name
+}
+
+output "resource_group_name" {
+  description = "The name of the Resource Group"
+  value       = coalesce(var.resource_group_name, local.generated_rg_name)
+}

@@ -11,7 +11,7 @@
 // limitations under the License.
 
 locals {
-
   subnet_id_parts = split("/", var.acr_subnet_id)
   vnet_id         = join("/", slice(local.subnet_id_parts, 0, 9))
+  fetch_zone_id   = var.create_dns_vnet_link == false && var.create_private_dns_zone == false ? true : false
 }

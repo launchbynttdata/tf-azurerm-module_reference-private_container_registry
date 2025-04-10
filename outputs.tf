@@ -12,7 +12,12 @@
 
 output "resource_group_name" {
   description = "The name of the Resource Group"
-  value       = var.create_resource_group ? module.resource_group[0].name : var.resource_group_name
+  value       = coalesce(var.resource_group_name, can(module.resource_group[0].name) ? module.resource_group[0].name : null)
+}
+
+output "ext_dns_resource_group_name" {
+  description = "The name of the external DNS Resource Group"
+  value       = var.private_dns_zone_resource_group_name
 }
 
 output "resource_group_id" {
@@ -55,17 +60,17 @@ output "container_registry_admin_enabled" {
 
 output "private_dns_zone_id" {
   description = "The ID of the Private DNS Zone"
-  value       = module.private_dns_zone.id
+  value       = local.fetch_zone_id ? [data.azurerm_private_dns_zone.existing_private_zone[0].id] : [module.private_dns_zone[0].id]
 }
 
 output "private_dns_zone_name" {
   description = "The name of the Private DNS Zone"
-  value       = module.private_dns_zone.zone_name
+  value       = var.private_dns_zone_name
 }
 
 output "vnet_link_id" {
   description = "The ID of the VNet Link"
-  value       = module.vnet_link.id
+  value       = var.create_dns_vnet_link ? module.vnet_link[0].id : null
 }
 
 output "private_endpoint_id" {
