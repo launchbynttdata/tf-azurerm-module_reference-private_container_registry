@@ -56,7 +56,7 @@ module "acr" {
   network_rule_set              = var.network_rule_set
   retention_policy              = var.retention_policy
 
-  tags = merge(var.tags, { resource_name = module.resource_names["acr"].standard })
+  tags = merge(var.tags, { resource_name = coalesce(var.container_registry_name, module.resource_names["acr"].standard) })
 
   depends_on = [module.resource_group]
 }

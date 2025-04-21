@@ -123,6 +123,17 @@ func TestComposableComplete(t *testing.T, ctx types.TestContext) {
 	t.Run("doesPrivateEndpointDNSRecordExist", func(t *testing.T) {
 		assertDNSRecordExists(t, dnsClient, dnsResourceGroupName, DefaultPrivateDNSZoneName, RecordTypeA, acrName)
 	})
+
+	t.Run("doACRTagsExist", func(t *testing.T) {
+		registry, err := registryClient.Get(backgroundCtx, selfManagedDNSResourceGroupName, acrName, nil)
+		if err != nil {
+			t.Fatalf("failed to get ACR %s: %v", acrName, err)
+		}
+		tags := registry.Tags
+		assertTagsContain(t, tags, map[string]string{
+			"resource_name": acrName,
+		})
+	})
 }
 
 // assertDNSRecordExists verifies the existence of a specific DNS record in an Azure Private DNS zone.
@@ -146,4 +157,24 @@ func assertDNSRecordExists(t *testing.T, dnsClient *armprivatedns.RecordSetsClie
 		t.Fatalf("failed to get DNS record: %v", err)
 	}
 	assert.Equal(t, nil, err, fmt.Sprintf("%s DNS record should exist in %s zone", recordType, dnsZoneName))
+}
+
+// assertTagsContain verifies that a given map of Azure resource tags contains all expected key-value pairs.
+// It compares each key-value pair in expectedTags against the actual tags map and fails the test if
+// any expected tag is missing or has a different value.
+//
+// Parameters:
+//   - t: Testing object to manage test state and report failures
+//   - tags: Map of actual Azure resource tags where key is tag name and value is a pointer to tag value
+//   - expectedTags: Map of expected tags where key is tag name and value is the expected tag value
+//
+// The function will fail the test if:
+//   - An expected tag key is not present in the actual tags
+//   - The value of an expected tag does not match the actual tag value
+func assertTagsContain(t *testing.T, tags map[string]*string, expectedTags map[string]string) {
+	for key, value := range expectedTags {
+		if val, ok := tags[key]; !ok || *val != value {
+			t.Fatalf("expected tag %s to be %s, got %s", key, value, *val)
+		}
+	}
 }
